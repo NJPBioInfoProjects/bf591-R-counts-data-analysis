@@ -53,8 +53,13 @@ filter_zero_var_genes <- function(verse_counts) {
 #' @example `timepoint_from_sample("vAd_1")`
 #' output:`"Ad"`
 
+# timepoint_from_sample which extracts the ages of the subjects (P0, P4, P7, and Ad) from the sample names
 timepoint_from_sample <- function(x) {
-    return(NULL)
+  names <- colnames(x)[-1]
+  timepoints <- str_extract(names, "P[0-9]+|Ad")
+  
+  
+  return(timepoints)
 }
 
 
@@ -68,8 +73,12 @@ timepoint_from_sample <- function(x) {
 #' @example `sample_replicate("vAd_1")`
 #' output: `"1"`
 
+# sample_replicate which extracts the sample replicate number (“1” or “2”)
 sample_replicate <- function(x) {
-    return(NULL)
+  names <- colnames(x)[-1]
+  replicate <- str_extract(names, "[0-9]$")
+  
+  return(replicate)
 }
 
 
@@ -91,7 +100,14 @@ sample_replicate <- function(x) {
 #' @example `meta <- meta_info_from_labels(colnames(count_data)[colnames(count_data)!='gene'])`
 
 meta_info_from_labels <- function(sample_names) {
-    return(NULL)
+  
+  meta_info <- tibble(
+    sample = colnames(sample_names)[-1],
+    timepoint = timepoint_from_sample(sample_names),
+    replicate = sample_replicate(sample_names)
+  )  
+  
+  return(meta_info)
 }
 
 

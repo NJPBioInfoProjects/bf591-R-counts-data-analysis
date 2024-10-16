@@ -69,7 +69,9 @@ with all the relevant information.
 
 ```{r}
 #Create and display the sample meta data tibble
+meta_info <- meta_info_from_labels(filtered)
 
+meta_info
 ```
 
 ## 3. Normalization
