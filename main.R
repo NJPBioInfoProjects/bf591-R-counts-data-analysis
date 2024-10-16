@@ -16,7 +16,9 @@ library(DESeq2)
 #' @example `verse_counts <- read_data('verse_counts.tsv')`
 
 read_data <- function(filename){
-    return(NULL)
+  data <- read_delim(filename)
+  
+  return(data)
 }
 
 
@@ -34,7 +36,10 @@ read_data <- function(filename){
 #' @example `filtered_counts <- filter_zero_var_genes(verse_counts)`
 
 filter_zero_var_genes <- function(verse_counts) {
-    return(NULL)
+  filtered_cts <- verse_counts %>%
+    filter(!apply(select(., -gene), 1, function(x) length(unique(x)) == 1))
+  
+  return(filtered_cts)    
 }
 
 

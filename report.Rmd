@@ -25,7 +25,7 @@ markdown environments when grading them.
 
 ```{r setup, include=FALSE, results='hide'}
 #Source your main
-
+source('main.R')
 ```
 
 ## 1.  Reading and filtering count data
@@ -40,15 +40,17 @@ to reduce the size of our dataset if memory issues are a constraint.
 ### 1a. import data
 ```{r}
 #Read in verse_counts.tsv and display the head of the resulting tibble
-
+cts <- read_data("data/verse_counts.tsv")
 #Display the top 10 rows of verse counts
+head(cts, 10)
 ```
 
 ### 1b. Apply filter_zero_var_genes()
 ```{r}
 #Filter out zero variance genes using the function you created in `main.R
-
+filtered <- filter_zero_var_genes(cts)
 #display the head of the counts data from the zero variance filter function's output
+head(filtered)
 ```
 
 ## 2. Constructing sample meta data from sample names
