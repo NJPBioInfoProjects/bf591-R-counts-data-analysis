@@ -172,7 +172,9 @@ function is able to scale the y-axis to $log10$ values if specified by the
 
 ```{r}
 #Create and display your count distributions boxplot
+sample_distributions <- plot_sample_distributions(filtered, scale_y_axis = TRUE)
 
+sample_distributions
 ```
 
 ### 4b. Count variance vs mean count

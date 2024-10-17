@@ -236,7 +236,31 @@ plot_pca <- function(data, meta, title="") {
 #' @example `plot_sample_distributions(data, scale_y_axis=TRUE, title='Raw Count Distributions')`
 
 plot_sample_distributions <- function(data, scale_y_axis=FALSE, title="") {
-    return(NULL)
+    # Transform the data to a long format for ggplot2
+    long_data <- data %>%
+      pivot_longer(
+        cols = -gene,  # Exclude 'gene' column from pivoting
+        names_to = "sample", 
+        values_to = "count"
+      )
+    
+    # Create the base ggplot object
+    p <- ggplot(long_data, aes(x = sample, y = count, color = sample)) +
+      geom_boxplot() +
+      #theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+      labs(
+        title = "Sample Distributions",
+        x = "sample",
+        y = "counts"
+      )
+    
+    # Apply log10 scaling to the y-axis if requested
+    if (scale_y_axis) {
+      p <- p + scale_y_log10() +
+        labs(title = "Sample Distributions (Log10(Raw Counts))", y = "counts")
+    }
+  
+  # Example usage: Plot with log10 scale on the y-axis
 }
 
 
