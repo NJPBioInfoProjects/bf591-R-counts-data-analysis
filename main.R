@@ -56,7 +56,7 @@ filter_zero_var_genes <- function(verse_counts) {
 # timepoint_from_sample which extracts the ages of the subjects (P0, P4, P7, and Ad) from the sample names
 timepoint_from_sample <- function(x) {
   names <- colnames(x)[-1]
-  timepoints <- str_extract(names, "P[0-9]+|Ad")
+  timepoints <- str_extract(sub("^v", "", names), "[A-Za-z0-9]+")
   
   
   return(timepoints)
@@ -123,7 +123,12 @@ meta_info_from_labels <- function(sample_names) {
 #' @examples `get_library_size(count_data)`
 
 get_library_size <- function(count_data) {
-    return(NULL)
+  size <- count_data %>%
+    select(-gene) %>%
+    summarize(across(everything(), sum)) %>%
+    pivot_longer(cols = everything(), names_to = 'sample', values_to = 'value')
+  
+  return(size)
 }
 
 
@@ -141,7 +146,13 @@ get_library_size <- function(count_data) {
 #' `normalize_by_cpm(count_data)`
 
 normalize_by_cpm <- function(count_data) {
-    return(NULL)
+  library_sizes <- colSums(count_data[-1])  # Exclude gene column for sums
+  
+  # Apply CPM normalization formula to each column
+  df_normalized <- count_data %>%
+    mutate(across(-gene, ~ . / library_sizes[as.character(cur_column())] * 1e6))
+  
+  return(df_normalized)
 }
 
 #' Normalize raw count matrix using DESeq2

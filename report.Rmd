@@ -106,8 +106,18 @@ the barplot or write the code in the RMarkdown at your discretion.
 
 ```{r}
 #Calculate the number of reads in each sample and plot as a barplot
+sizes <- get_library_size(filtered)
+
+ggplot(sizes, aes(x = sample, y = value, fill = sample)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Library Sizes", y = "# reads", x = "Sample", fill = "Sample")
 
 #Make a barplot showing the number of millions of reads for each sample
+
+ggplot(sizes, aes(x = sample, y = value / 1e6, fill = sample)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Library Sizes", y = "# reads", x = "Sample", fill = "Sample")
+
 ```
 
 #### CPM calculation
@@ -117,6 +127,9 @@ the provided formula.
 
 ```{r}
 #Normalize your filtered counts matrix with CPM and display the head
+
+normal <- normalize_by_cpm(filtered)
+head(normal)
 
 ```
 
