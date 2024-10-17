@@ -168,8 +168,38 @@ normalize_by_cpm <- function(count_data) {
 #'
 #' @examples
 #' `deseq_normalize(count_data, meta_data)`
+
 deseq_normalize <- function(count_data, meta_data) {
-    return(NULL)
+  # Prepare the count matrix (remove 'gene' column and set row names)
+  count_matrix <- as.matrix(count_data %>% select(-gene))
+  rownames(count_matrix) <- count_data$gene
+  
+  # Ensure meta_data aligns with the count matrix columns
+  meta_data <- meta_data %>%
+    filter(sample %in% colnames(count_matrix)) %>%
+    arrange(match(sample, colnames(count_matrix)))
+  
+  # Convert meta_data to a DataFrame for DESeq2 (to avoid tibble row name warning)
+  meta_data_df <- as.data.frame(meta_data)
+  rownames(meta_data_df) <- meta_data_df$sample  # Set sample names as row names
+  
+  # Create DESeqDataSet with the trivial design formula
+  dds <- DESeqDataSetFromMatrix(
+    countData = count_matrix,
+    colData = meta_data_df,
+    design = ~ 1
+  )
+  
+  # Run DESeq2 normalization (this does not fit the model, just normalizes)
+  dds <- estimateSizeFactors(dds)
+  
+  # Extract the normalized counts
+  normalized_counts <- counts(dds, normalized = TRUE)
+  
+  # Convert to a tibble for easier handling
+  normalized_counts_tibble <- as_tibble(normalized_counts, rownames = "gene")
+  
+  return(normalized_counts_tibble)
 }
 
 

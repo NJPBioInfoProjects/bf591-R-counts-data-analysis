@@ -152,7 +152,9 @@ may pass `~1` as the design formula to pass a trivial formula when creating the
 
 ```{r}
 #Normalize your filtered data and display the head of the resulting tibble
+normalized_counts <- deseq_normalize(filtered, meta_info)
 
+head(normalized_counts)
 ```
 
 ## 4 Visualization
