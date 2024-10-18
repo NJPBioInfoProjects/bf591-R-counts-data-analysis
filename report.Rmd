@@ -69,7 +69,7 @@ with all the relevant information.
 
 ```{r}
 #Create and display the sample meta data tibble
-meta_info <- meta_info_from_labels(filtered)
+meta_info <- meta_info_from_labels(colnames(filtered)[-1])
 
 meta_info
 ```
@@ -128,8 +128,8 @@ the provided formula.
 ```{r}
 #Normalize your filtered counts matrix with CPM and display the head
 
-normal <- normalize_by_cpm(filtered)
-head(normal)
+normalized_cpm <- normalize_by_cpm(filtered)
+head(normalized_cpm)
 
 ```
 
@@ -152,9 +152,9 @@ may pass `~1` as the design formula to pass a trivial formula when creating the
 
 ```{r}
 #Normalize your filtered data and display the head of the resulting tibble
-normalized_counts <- deseq_normalize(filtered, meta_info)
+normalized_deseq <- deseq_normalize(filtered, meta_info)
 
-head(normalized_counts)
+head(normalized_deseq)
 ```
 
 ## 4 Visualization
@@ -172,9 +172,9 @@ function is able to scale the y-axis to $log10$ values if specified by the
 
 ```{r}
 #Create and display your count distributions boxplot
-sample_distributions <- plot_sample_distributions(filtered, scale_y_axis = TRUE)
+filtered_sample_distributions <- plot_sample_distributions(filtered, scale_y_axis = TRUE, "Sample Distributions (Log10(Raw Counts))")
 
-sample_distributions
+filtered_sample_distributions
 ```
 
 ### 4b. Count variance vs mean count
@@ -193,6 +193,9 @@ rank $1$.
 ```{r}
 #Create and display your variance vs mean plot
 
+filtered_variance_vs_mean <- plot_variance_vs_mean(filtered, scale_y_axis = TRUE, title = "Variance vs. Mean (Log10(Raw Counts))")
+
+filtered_variance_vs_mean
 ```
 
 ### 4c. Visualizing patterns with PCA
@@ -208,7 +211,9 @@ where each dot represents a sample and is colored by its respective sample name.
 
 ```{r}
 #Create and display your PCA plot
+filtered_pca <- plot_pca(filtered, meta_info, "Raw Counts PCA")
 
+filtered_pca
 ```
 
 ### 5. Visualizing CPM
@@ -227,6 +232,13 @@ to `scale_y_axis` when calling functions that have that parameter.
 
 ```{r}
 #Create and display 3 plots of your cpm matrix: Sample Distribution, Variance vs Mean, and PCA
+cpm_sample_distributions <- plot_sample_distributions(normalized_cpm, scale_y_axis = TRUE, "Sample Distributions (Log10(CPM))")
+cpm_variance_vs_mean <- plot_variance_vs_mean(normalized_cpm, scale_y_axis = TRUE, title = "Variance vs. Mean (Log10(CPM))")
+cpm_pca <- plot_pca(normalized_cpm, meta_info, "CPM PCA")
+
+cpm_sample_distributions
+cpm_variance_vs_mean
+cpm_pca
 
 ```
 
@@ -245,5 +257,11 @@ display your Sample Distribution, Variance vs Mean, and PCA plots.
 
 ```{r}
 #Create and display 3 plots of your deseq-normalized data: Sample Distribution, Variance vs Mean, and PCA
+deseq_sample_distributions <- plot_sample_distributions(normalized_deseq, scale_y_axis = TRUE, "Sample Distributions (Log10(deseq Counts))")
+deseq_variance_vs_mean <- plot_variance_vs_mean(normalized_deseq, scale_y_axis = TRUE, title = "Variance vs. Mean (Log10(deseq Counts))")
+deseq_pca <- plot_pca(normalized_deseq, meta_info, "deseq Counts PCA")
 
+deseq_sample_distributions
+deseq_variance_vs_mean
+deseq_pca
 ```

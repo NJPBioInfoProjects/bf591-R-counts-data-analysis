@@ -55,11 +55,10 @@ filter_zero_var_genes <- function(verse_counts) {
 
 # timepoint_from_sample which extracts the ages of the subjects (P0, P4, P7, and Ad) from the sample names
 timepoint_from_sample <- function(x) {
-  names <- colnames(x)[-1]
-  timepoints <- str_extract(sub("^v", "", names), "[A-Za-z0-9]+")
+  timepoint <- substr(x, 2, 3)
   
   
-  return(timepoints)
+  return(timepoint)
 }
 
 
@@ -75,8 +74,7 @@ timepoint_from_sample <- function(x) {
 
 # sample_replicate which extracts the sample replicate number (“1” or “2”)
 sample_replicate <- function(x) {
-  names <- colnames(x)[-1]
-  replicate <- str_extract(names, "[0-9]$")
+  replicate <- substr(x, 5, 6)
   
   return(replicate)
 }
@@ -102,7 +100,7 @@ sample_replicate <- function(x) {
 meta_info_from_labels <- function(sample_names) {
   
   meta_info <- tibble(
-    sample = colnames(sample_names)[-1],
+    sample = sample_names,
     timepoint = timepoint_from_sample(sample_names),
     replicate = sample_replicate(sample_names)
   )  
@@ -196,7 +194,7 @@ deseq_normalize <- function(count_data, meta_data) {
   # Extract the normalized counts
   normalized_counts <- counts(dds, normalized = TRUE)
   
-  # Convert to a tibble for easier handling
+  # Convert to a tibble
   normalized_counts_tibble <- as_tibble(normalized_counts, rownames = "gene")
   
   return(normalized_counts_tibble)
@@ -218,8 +216,43 @@ deseq_normalize <- function(count_data, meta_data) {
 #' @examples
 #' `plot_pca(data, meta, "Raw Count PCA")`
 
-plot_pca <- function(data, meta, title="") {
-    return(NULL)
+plot_pca <- function(data, meta_data, title = "PCA Plot") {
+  data <- as_tibble(data)
+  
+  # Convert to matrix
+  count_matrix <- data %>%
+    select(-gene) %>%   
+    t() %>%             
+    as.data.frame()      
+  
+  # Ensure the row names of the count matrix are the sample names
+  rownames(count_matrix) <- colnames(data)[-1]
+  
+  # Perform PCA on the transposed matrix)
+  pca_result <- prcomp(count_matrix, scale. = TRUE)
+  
+  # Calculate the percentage of variance explained by each PC
+  variance_explained <- pca_result$sdev^2 / sum(pca_result$sdev^2) * 100
+  
+  # Extract the first two PCs and convert to a data frame
+  pca_data <- as.data.frame(pca_result$x[, 1:2])
+  colnames(pca_data) <- c("PC1", "PC2")
+  
+  # Add sample names to the PCA data and join with metadata
+  pca_data <- pca_data %>%
+    mutate(sample = rownames(pca_data)) %>%
+    inner_join(meta_data, by = "sample")
+  
+  # Create the scatter plot
+  p <- ggplot(pca_data, aes(x = PC1, y = PC2, color = timepoint)) +  # Use 'condition' from metadata
+    geom_point() +
+    labs(
+      title = title,
+      x = paste0("PC1: ", round(variance_explained[1], 1), "% variance"),
+      y = paste0("PC2: ", round(variance_explained[2], 1), "% variance")
+    )
+  
+  return(p)
 }
 
 
@@ -249,7 +282,7 @@ plot_sample_distributions <- function(data, scale_y_axis=FALSE, title="") {
       geom_boxplot() +
       #theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
       labs(
-        title = "Sample Distributions",
+        title = title,
         x = "sample",
         y = "counts"
       )
@@ -257,7 +290,7 @@ plot_sample_distributions <- function(data, scale_y_axis=FALSE, title="") {
     # Apply log10 scaling to the y-axis if requested
     if (scale_y_axis) {
       p <- p + scale_y_log10() +
-        labs(title = "Sample Distributions (Log10(Raw Counts))", y = "counts")
+        labs(title = title, y = "counts")
     }
   
   # Example usage: Plot with log10 scale on the y-axis
@@ -280,7 +313,23 @@ plot_sample_distributions <- function(data, scale_y_axis=FALSE, title="") {
 #'
 #' @example `plot_variance_vs_mean(data, scale_y_axis=TRUE, title='variance vs mean (raw counts)')`
 
-plot_variance_vs_mean <- function(data, scale_y_axis=FALSE, title="") {
-    return(NULL)
+plot_variance_vs_mean <- function(data, scale_y_axis = FALSE, title = "") {
+  #calculate mean and variance
+  var <- data %>% select(-gene) %>% apply(1, var)
+  mean <- data %>% select(-gene) %>% apply(1, mean)
+  
+  var_mean <- tibble(
+    variance = var,
+    mean = mean
+  )
+  
+  rownames(var_mean) <- filtered$gene
+  
+  p <- var_mean %>% ggplot() +
+    geom_point(aes(x=rank(mean), y=log10(var))) +
+    geom_smooth(aes(x = rank(mean), y = log10(var))) +
+    ggtitle(title)
+  
+  return(p)
 }
 
