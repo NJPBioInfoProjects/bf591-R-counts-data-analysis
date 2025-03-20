@@ -1,6 +1,6 @@
 ---
 title: "Assignment 4"
-author: "Dakota Hawkins & Mae Rose Gott"
+author: Nicolas Petrunich
 output: html_document
 ---
 
@@ -42,6 +42,8 @@ to reduce the size of our dataset if memory issues are a constraint.
 #Read in verse_counts.tsv and display the head of the resulting tibble
 cts <- read_data("data/verse_counts.tsv")
 #Display the top 10 rows of verse counts
+
+write.csv(cts, "counts.csv")
 head(cts, 10)
 ```
 
@@ -130,6 +132,8 @@ the provided formula.
 
 normalized_cpm <- normalize_by_cpm(filtered)
 head(normalized_cpm)
+
+write.csv(normalized_cpm, "normalized_counts.csv")
 
 ```
 
